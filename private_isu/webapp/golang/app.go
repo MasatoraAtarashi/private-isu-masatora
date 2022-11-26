@@ -30,7 +30,7 @@ var (
 )
 
 const (
-	postsPerPage  = 20
+	postsPerPage  = 2
 	ISO8601Format = "2006-01-02T15:04:05-07:00"
 	UploadLimit   = 10 * 1024 * 1024 // 10mb
 )
