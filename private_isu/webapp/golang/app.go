@@ -839,11 +839,11 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = clearCommentsCache(postID)
-	if err != nil {
-		log.Print(err)
-		return
-	}
+	//err = clearCommentsCache(postID)
+	//if err != nil {
+	//	log.Print(err)
+	//	return
+	//}
 
 	http.Redirect(w, r, fmt.Sprintf("/posts/%d", postID), http.StatusFound)
 }
