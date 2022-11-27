@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	crand "crypto/rand"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -178,18 +179,36 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	var posts []Post
 
 	for _, p := range results {
-		memcacheClient.Set(&memcache.Item{
-			Key:   fmt.Sprintf("comments.%d.count", p.ID),
-			Value: []byte{3},
-		})
-		cachedCommentCount, _ := memcacheClient.Get(fmt.Sprintf("comments.%d.count", p.ID))
-		log.Print(cachedCommentCount)
 
-		err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
-		if err != nil {
+		// コメント数をmemcachedから取得
+		cachedCommentCount, err := memcacheClient.Get(fmt.Sprintf("comments.%d.count", p.ID))
+		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
 			return nil, err
 		}
 
+		// キャッシュが存在したらそれを使う
+		if cachedCommentCount != nil {
+			count, err := strconv.Atoi(string(cachedCommentCount.Value))
+			if err != nil {
+				return nil, err
+			}
+
+			p.CommentCount = count
+		} else {
+			// 存在しなかったらDBに問い合せる
+			err = db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			// キャッシュをセット
+			memcacheClient.Set(&memcache.Item{
+				Key:   fmt.Sprintf("comments.%d.count", p.ID),
+				Value: []byte(strconv.Itoa(p.CommentCount)),
+			})
+		}
+
+		// コメントも↑と同様
 		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
 		if !allComments {
 			query += " LIMIT 3"
@@ -213,6 +232,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		p.Comments = comments
+		// memcachedにセットする
 
 		p.CSRFToken = csrfToken
 
