@@ -23,8 +23,8 @@ analyze-slow-query:
 analyze-nginx-log:
 	sudo cat /var/log/nginx/access.log | alp json --sort sum -r -m "/posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum
 
-restart-nginx:
-	sudo systemctl reload nginx
+reload-nginx:
+	nginx -t && sudo systemctl reload nginx
 
-restart-mysql:
+reload-mysql:
 	sudo systemctl reload mysql
