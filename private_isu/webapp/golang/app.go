@@ -188,6 +188,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		// キャッシュが存在したらそれを使う
 		if cachedCommentCount != nil {
+			log.Print(cachedCommentCount.Value)
 			count, err := strconv.Atoi(string(cachedCommentCount.Value))
 			if err != nil {
 				return nil, err
