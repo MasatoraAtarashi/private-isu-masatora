@@ -26,8 +26,9 @@ import (
 )
 
 var (
-	db    *sqlx.DB
-	store *gsm.MemcacheStore
+	db             *sqlx.DB
+	memcacheClient *memcache.Client
+	store          *gsm.MemcacheStore
 )
 
 const (
@@ -73,7 +74,7 @@ func init() {
 	if memdAddr == "" {
 		memdAddr = "localhost:11211"
 	}
-	memcacheClient := memcache.New(memdAddr)
+	memcacheClient = memcache.New(memdAddr)
 	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
@@ -177,6 +178,13 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	var posts []Post
 
 	for _, p := range results {
+		memcacheClient.Set(&memcache.Item{
+			Key:   fmt.Sprintf("comments.%d.count", p.ID),
+			Value: []byte{3},
+		})
+		cachedCommentCount, _ := memcacheClient.Get(fmt.Sprintf("comments.%d.count", p.ID))
+		log.Print(cachedCommentCount)
+
 		err := db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
 		if err != nil {
 			return nil, err
