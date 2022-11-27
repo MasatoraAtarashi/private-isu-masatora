@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	crand "crypto/rand"
 	"fmt"
 	"html/template"
@@ -666,7 +667,14 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 画像ファイルをpublic/image/ディレクトリに書き込む
-	err = os.WriteFile(fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext), filedata, 0644)
+	imgFile, err := os.Create(fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	writer := bufio.NewWriter(imgFile)
+	_, err = writer.Write(filedata)
 	if err != nil {
 		log.Print(err)
 		return
