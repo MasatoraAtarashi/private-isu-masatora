@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	crand "crypto/rand"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -189,20 +188,15 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 		// キャッシュが存在したらそれを使う
 		if cachedCommentCount != nil {
-			var count int
-			log.Print(cachedCommentCount.Value)
-			err := json.Unmarshal(cachedCommentCount.Value, &count)
+			// どうやるんや
+			countStrBrackets := string(cachedCommentCount.Value)
+			count, err := strconv.Atoi(strings.Replace(strings.Replace(countStrBrackets, "[", "", -1), "]", "", -1))
 			log.Print(count)
 			if err != nil {
 				return nil, err
 			}
 
-			c, err := strconv.Atoi(string(cachedCommentCount.Value))
-			if err != nil {
-				return nil, err
-			}
-
-			p.CommentCount = c
+			p.CommentCount = count
 		} else {
 			// 存在しなかったらDBに問い合せる
 			err = db.Get(&p.CommentCount, "SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?", p.ID)
