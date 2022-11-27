@@ -302,9 +302,7 @@ func clearCommentsCache(pid int) error {
 	}
 
 	err = memcacheClient.Delete(fmt.Sprintf("comments.%d.%t", pid, false))
-	if err != nil {
-		return err
-	}
+	return err
 }
 
 func imageURL(p Post) string {
