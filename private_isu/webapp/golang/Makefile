@@ -12,3 +12,13 @@ refresh-app:
 rotate:
 	sh ../../../scripts/nginx-log-rotate.sh
 	sh ../../../scripts/slow-query-log-rotate.sh
+
+analyze:
+	make analyze-nginx-log
+	make analyze-slow-query
+
+analyze-slow-query:
+	sudo mysqldumpslow -s t /var/log/mysql/mysql-slow.log
+
+analyze-nginx-log:
+	sudo cat /var/log/nginx/access.log | alp json --sort sum -r -m "/posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum
