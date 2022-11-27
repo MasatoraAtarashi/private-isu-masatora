@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	crand "crypto/rand"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -206,7 +207,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			}
 
 			countStr := strconv.Itoa(p.CommentCount)
-			log.Printf("countStr: %s", countStr)
 
 			// キャッシュをセット
 			err = memcacheClient.Set(&memcache.Item{
@@ -219,30 +219,59 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		}
 
 		// コメントも↑と同様
-		query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
-		if !allComments {
-			query += " LIMIT 3"
-		}
-		var comments []Comment
-		err = db.Select(&comments, query, p.ID)
-		if err != nil {
+		cachedComments, err := memcacheClient.Get(fmt.Sprintf("comments.%d.%t", p.ID, allComments))
+		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
 			return nil, err
 		}
 
-		for i := 0; i < len(comments); i++ {
-			err := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
+		if cachedComments != nil {
+			var comments []Comment
+			err := json.Unmarshal(cachedComments.Value, &comments)
+			if err != nil {
+				return nil, err
+			}
+			log.Printf("comments: %+v", comments)
+			p.Comments = comments
+		} else {
+			query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
+			if !allComments {
+				query += " LIMIT 3"
+			}
+			var comments []Comment
+			err = db.Select(&comments, query, p.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			for i := 0; i < len(comments); i++ {
+				err := db.Get(&comments[i].User, "SELECT * FROM `users` WHERE `id` = ?", comments[i].UserID)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			// reverse
+			for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {
+				comments[i], comments[j] = comments[j], comments[i]
+			}
+
+			p.Comments = comments
+
+			bytes, err := json.Marshal(p.Comments)
+			if err != nil {
+				return nil, err
+			}
+
+			err = memcacheClient.Set(&memcache.Item{
+				Key:        fmt.Sprintf("comments.%d.%t", p.ID, allComments),
+				Value:      bytes,
+				Flags:      0,
+				Expiration: 0,
+			})
 			if err != nil {
 				return nil, err
 			}
 		}
-
-		// reverse
-		for i, j := 0, len(comments)-1; i < j; i, j = i+1, j-1 {
-			comments[i], comments[j] = comments[j], comments[i]
-		}
-
-		p.Comments = comments
-		// memcachedにセットする
 
 		p.CSRFToken = csrfToken
 
