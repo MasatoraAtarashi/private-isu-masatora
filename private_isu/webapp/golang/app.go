@@ -652,8 +652,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		query,
 		me.ID,
 		mime,
-		//[]byte(""),
-		filedata,
+		[]byte(""),
 		r.FormValue("body"),
 	)
 	if err != nil {
@@ -667,15 +666,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 画像ファイルをpublic/image/ディレクトリに書き込む
-	imgFile, err := os.Create(fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext))
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
-	writer := bufio.NewWriter(imgFile)
-	_, err = writer.Write(filedata)
+	err = writeImageFile(pid, ext, filedata)
 	if err != nil {
 		log.Print(err)
 		return
@@ -713,7 +704,26 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = writeImageFile(int64(pid), ext, post.Imgdata)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func writeImageFile(pid int64, ext string, data []byte) error {
+	// 画像ファイルをpublic/image/ディレクトリに書き込む
+	imgFile, err := os.Create(fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext))
+	if err != nil {
+		return err
+	}
+	defer imgFile.Close()
+
+	writer := bufio.NewWriter(imgFile)
+	_, err = writer.Write(data)
+	return err
 }
 
 func postComment(w http.ResponseWriter, r *http.Request) {
