@@ -257,10 +257,14 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 			p.Comments = comments
 
+			log.Printf("p.Comments: %+v", p.Comments)
+
 			bytes, err := json.Marshal(p.Comments)
 			if err != nil {
 				return nil, err
 			}
+
+			log.Printf("key: %s", fmt.Sprintf("comments.%d.%t", p.ID, allComments))
 
 			err = memcacheClient.Set(&memcache.Item{
 				Key:        fmt.Sprintf("comments.%d.%t", p.ID, allComments),
