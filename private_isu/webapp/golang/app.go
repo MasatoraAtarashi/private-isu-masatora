@@ -20,8 +20,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
-
 	"github.com/bradfitz/gomemcache/memcache"
 	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
 	"github.com/go-chi/chi/v5"
@@ -295,16 +293,6 @@ func setCommentsCache(comments []Comment, pid int, allComments bool) error {
 		Expiration: 0,
 	})
 
-	return err
-}
-
-func clearCommentsCache(pid int) error {
-	err := memcacheClient.Delete(fmt.Sprintf("comments.%d.%t", pid, true))
-	if err != nil {
-		return err
-	}
-
-	err = memcacheClient.Delete(fmt.Sprintf("comments.%d.%t", pid, false))
 	return err
 }
 
@@ -842,12 +830,6 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//err = clearCommentsCache(postID)
-	//if err != nil {
-	//	log.Print(err)
-	//	return
-	//}
-
 	http.Redirect(w, r, fmt.Sprintf("/posts/%d", postID), http.StatusFound)
 }
 
@@ -971,7 +953,7 @@ func main() {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
 	})
 
-	r.Mount("/debug", middleware.Profiler())
+	//r.Mount("/debug", middleware.Profiler())
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
