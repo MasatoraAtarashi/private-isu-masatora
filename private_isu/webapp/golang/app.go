@@ -615,7 +615,7 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		contentType := header.Header["Content-Type"][0]
 		if strings.Contains(contentType, "jpeg") {
 			mime = "image/jpeg"
-			ext = "jpq"
+			ext = "jpg"
 		} else if strings.Contains(contentType, "png") {
 			mime = "image/png"
 			ext = "png"
