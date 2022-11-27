@@ -24,7 +24,7 @@ analyze-nginx-log:
 	sudo cat /var/log/nginx/access.log | alp json --sort sum -r -m "/posts/[0-9]+,/@\w+,/image/\d+" -o count,method,uri,min,avg,max,sum
 
 reload-nginx:
-	nginx -t && sudo systemctl reload nginx
+	sudo nginx -t && sudo systemctl reload nginx
 
 reload-mysql:
 	sudo systemctl reload mysql
