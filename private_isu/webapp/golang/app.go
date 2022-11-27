@@ -23,6 +23,7 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
@@ -961,7 +962,7 @@ func main() {
 		http.FileServer(http.Dir("../public")).ServeHTTP(w, r)
 	})
 
-	//r.Mount("/debug", middleware.Profiler())
+	r.Mount("/debug", middleware.Profiler())
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
