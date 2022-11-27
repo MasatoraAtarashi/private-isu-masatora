@@ -190,7 +190,9 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		if cachedCommentCount != nil {
 			// どうやるんや
 			countStrBrackets := string(cachedCommentCount.Value)
-			count, err := strconv.Atoi(strings.Replace(strings.Replace(countStrBrackets, "[", "", -1), "]", "", -1))
+			a := strings.Replace(strings.Replace(countStrBrackets, "[", "", -1), "]", "", -1)
+			log.Print(a)
+			count, err := strconv.Atoi(a)
 			log.Print(count)
 			if err != nil {
 				return nil, err
