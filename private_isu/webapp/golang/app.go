@@ -178,7 +178,7 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 }
 
 func toCommentCountCacheKey(postID int) string {
-	return fmt.Sprintf("comments.%d.count", p.ID)
+	return fmt.Sprintf("comments.%d.count", postID)
 }
 
 func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
