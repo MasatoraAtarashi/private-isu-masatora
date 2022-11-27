@@ -34,7 +34,7 @@ const (
 	postsPerPage  = 20
 	ISO8601Format = "2006-01-02T15:04:05-07:00"
 	UploadLimit   = 10 * 1024 * 1024 // 10mb
-	imgDir        = "/home/isucon/private-isu/webapp/public/image"
+	imgDir        = "/home/isucon/private_isu/webapp/public/image"
 )
 
 type User struct {
@@ -652,7 +652,8 @@ func postIndex(w http.ResponseWriter, r *http.Request) {
 		query,
 		me.ID,
 		mime,
-		[]byte(""),
+		//[]byte(""),
+		filedata,
 		r.FormValue("body"),
 	)
 	if err != nil {
