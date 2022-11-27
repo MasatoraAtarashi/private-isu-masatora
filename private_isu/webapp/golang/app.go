@@ -182,16 +182,27 @@ func toCommentCountCacheKey(postID int) string {
 	return fmt.Sprintf("comments.%d.count", postID)
 }
 
+func toCommentCacheKey(postID int, allComments bool) string {
+	return fmt.Sprintf("comments.%d.%t", postID, allComments)
+}
+
 func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
 	var posts []Post
 
 	var countKeys []string
+	var commentKeys []string
 	for _, p := range results {
 		countKeys = append(countKeys, toCommentCountCacheKey(p.ID))
+		commentKeys = append(commentKeys, toCommentCacheKey(p.ID, allComments))
 	}
 
 	// コメント数をmemcachedから取得
 	cachedCommentCountMap, err := memcacheClient.GetMulti(countKeys)
+	if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
+		return nil, err
+	}
+
+	cachedCommentMap, err := memcacheClient.GetMulti(commentKeys)
 	if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
 		return nil, err
 	}
@@ -228,13 +239,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			}
 		}
 
-		// コメントもキャッシュから取得
-		cachedComments, err := memcacheClient.Get(fmt.Sprintf("comments.%d.%t", p.ID, allComments))
-		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
-			return nil, err
-		}
-
-		if cachedComments != nil {
+		if cachedComments := cachedCommentMap[toCommentCacheKey(p.ID, allComments)]; cachedComments != nil {
 			var comments []Comment
 			err := json.Unmarshal(cachedComments.Value, &comments)
 			if err != nil {
