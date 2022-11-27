@@ -177,19 +177,28 @@ func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 	}
 }
 
+func toCommentCountCacheKey(postID int) string {
+	return fmt.Sprintf("comments.%d.count", p.ID)
+}
+
 func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, error) {
 	var posts []Post
+
+	var countKeys []string
+	for _, p := range results {
+		countKeys = append(countKeys, toCommentCountCacheKey(p.ID))
+	}
 
 	for _, p := range results {
 
 		// コメント数をmemcachedから取得
-		cachedCommentCount, err := memcacheClient.Get(fmt.Sprintf("comments.%d.count", p.ID))
+		cachedCommentCountMap, err := memcacheClient.GetMulti(countKeys)
 		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
 			return nil, err
 		}
 
 		// キャッシュが存在したらそれを使う
-		if cachedCommentCount != nil {
+		if cachedCommentCount := cachedCommentCountMap[toCommentCountCacheKey(p.ID)]; cachedCommentCount != nil {
 			// どうやるんや
 			countStrBrackets := string(cachedCommentCount.Value)
 			countStrBrackets = strings.Replace(countStrBrackets, "[", "", -1)
