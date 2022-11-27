@@ -191,7 +191,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			// どうやるんや
 			log.Print(cachedCommentCount)
 			countStrBrackets := string(cachedCommentCount.Value)
-			log.Print(countStrBrackets)
+			log.Print("countStrBrackets", countStrBrackets)
 			a := strings.Replace(strings.Replace(countStrBrackets, "[", "", -1), "]", "", -1)
 			log.Print(a)
 			count, err := strconv.Atoi(a)
@@ -213,7 +213,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			// キャッシュをセット
 			err = memcacheClient.Set(&memcache.Item{
 				Key:   fmt.Sprintf("comments.%d.count", p.ID),
-				Value: []byte(strconv.Itoa(p.CommentCount)),
+				Value: []byte("3"),
 			})
 			if err != nil {
 				return nil, err
