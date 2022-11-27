@@ -257,24 +257,13 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 
 			p.Comments = comments
 
+			err := setCommentsCache(comments, p.ID, allComments)
+			if err != nil {
+				return nil, err
+			}
+
 			log.Printf("p.Comments: %+v", p.Comments)
 
-			bytes, err := json.Marshal(p.Comments)
-			if err != nil {
-				return nil, err
-			}
-
-			log.Printf("key: %s", fmt.Sprintf("comments.%d.%t", p.ID, allComments))
-
-			err = memcacheClient.Set(&memcache.Item{
-				Key:        fmt.Sprintf("comments.%d.%t", p.ID, allComments),
-				Value:      bytes,
-				Flags:      0,
-				Expiration: 0,
-			})
-			if err != nil {
-				return nil, err
-			}
 		}
 
 		p.CSRFToken = csrfToken
@@ -286,6 +275,36 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 	}
 
 	return posts, nil
+}
+
+func setCommentsCache(comments []Comment, pid int, allComments bool) error {
+	bytes, err := json.Marshal(comments)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("key: %s", fmt.Sprintf("comments.%d.%t", pid, allComments))
+
+	err = memcacheClient.Set(&memcache.Item{
+		Key:        fmt.Sprintf("comments.%d.%t", pid, allComments),
+		Value:      bytes,
+		Flags:      0,
+		Expiration: 0,
+	})
+
+	return err
+}
+
+func clearCommentsCache(pid int) error {
+	err := memcacheClient.Delete(fmt.Sprintf("comments.%d.%t", pid, true))
+	if err != nil {
+		return err
+	}
+
+	err = memcacheClient.Delete(fmt.Sprintf("comments.%d.%t", pid, false))
+	if err != nil {
+		return err
+	}
 }
 
 func imageURL(p Post) string {
@@ -817,6 +836,12 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 
 	query := "INSERT INTO `comments` (`post_id`, `user_id`, `comment`) VALUES (?,?,?)"
 	_, err = db.Exec(query, postID, me.ID, r.FormValue("comment"))
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	err = clearCommentsCache(postID)
 	if err != nil {
 		log.Print(err)
 		return
