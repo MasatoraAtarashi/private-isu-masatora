@@ -189,14 +189,13 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 		countKeys = append(countKeys, toCommentCountCacheKey(p.ID))
 	}
 
+	// コメント数をmemcachedから取得
+	cachedCommentCountMap, err := memcacheClient.GetMulti(countKeys)
+	if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
+		return nil, err
+	}
+
 	for _, p := range results {
-
-		// コメント数をmemcachedから取得
-		cachedCommentCountMap, err := memcacheClient.GetMulti(countKeys)
-		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
-			return nil, err
-		}
-
 		// キャッシュが存在したらそれを使う
 		if cachedCommentCount := cachedCommentCountMap[toCommentCountCacheKey(p.ID)]; cachedCommentCount != nil {
 			// どうやるんや
@@ -228,7 +227,7 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			}
 		}
 
-		// コメントも↑と同様
+		// コメントもキャッシュから取得
 		cachedComments, err := memcacheClient.Get(fmt.Sprintf("comments.%d.%t", p.ID, allComments))
 		if err != nil && !errors.Is(err, memcache.ErrCacheMiss) {
 			return nil, err
