@@ -31,3 +31,7 @@ reload-nginx:
 
 reload-mysql:
 	sudo systemctl reload mysql
+
+delete-old-logs:
+	sudo ls /var/log/mysql/ | grep mysql-slow | sudo xargs -If rm /var/log/mysql/f
+	sudo ls /var/log/nginx/ | grep access.log | sudo xargs -If rm /var/log/nginx/f
