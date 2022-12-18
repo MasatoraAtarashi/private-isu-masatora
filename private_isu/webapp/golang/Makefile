@@ -44,3 +44,6 @@ profile:
 
 get-log:
 	sudo journalctl -f -u isu-go
+
+login-mysql:
+	sudo mysql -u isuconp -pisuconp
