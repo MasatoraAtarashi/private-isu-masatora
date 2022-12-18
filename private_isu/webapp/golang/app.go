@@ -11,7 +11,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
@@ -42,6 +41,8 @@ func init() {
 	memcacheClient = memcache.New(memdAddr)
 	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
+	parseTemplates()
 }
 
 func dbInitialize() {
@@ -122,11 +123,6 @@ func getInitialize(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-var (
-	tplCache   = make(map[string]*template.Template, 6)
-	tplCacheMu sync.RWMutex
-)
-
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
@@ -144,34 +140,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file := "layout.html"
-
-	tplCacheMu.RLock()
-	tpl, ok := tplCache[file]
-	tplCacheMu.RUnlock()
-
-	if ok {
-		log.Println("tmplate cache used")
-	}
-
-	if !ok {
-		fmap := template.FuncMap{
-			"imageURL": imageURL,
-		}
-
-		tpl = template.Must(template.New(file).Funcs(fmap).ParseFiles(
-			getTemplPath("layout.html"),
-			getTemplPath("index.html"),
-			getTemplPath("posts.html"),
-			getTemplPath("post.html"),
-		))
-
-		tplCacheMu.Lock()
-		defer tplCacheMu.Unlock()
-		tplCache[file] = tpl
-	}
-
-	tpl.Execute(w, struct {
+	tplCache[templateKeyGetIndex].Execute(w, struct {
 		Posts     []Post
 		Me        User
 		CSRFToken string
