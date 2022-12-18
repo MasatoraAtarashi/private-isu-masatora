@@ -186,7 +186,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tplCache[templateKeyGetPost].Execute(w, posts)
+	w.Write([]byte(getPostsHTMLString(posts)))
 }
 
 func getPostsID(w http.ResponseWriter, r *http.Request) {

@@ -140,11 +140,12 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tplCache[templateKeyGetIndex].Execute(w, struct {
+		PostsHTML string
 		Posts     []Post
 		Me        User
 		CSRFToken string
 		Flash     string
-	}{posts, me, getCSRFToken(r), getFlash(w, r, "notice")})
+	}{getPostsHTMLString(posts), posts, me, getCSRFToken(r), getFlash(w, r, "notice")})
 }
 
 func getAccountName(w http.ResponseWriter, r *http.Request) {
@@ -215,13 +216,14 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
 	tplCache[templateKeyGetAccountName].Execute(w, struct {
+		PostsHTML      string
 		Posts          []Post
 		User           User
 		PostCount      int
 		CommentCount   int
 		CommentedCount int
 		Me             User
-	}{posts, user, postCount, commentCount, commentedCount, me})
+	}{getPostsHTMLString(posts), posts, user, postCount, commentCount, commentedCount, me})
 }
 
 func getAdminBanned(w http.ResponseWriter, r *http.Request) {

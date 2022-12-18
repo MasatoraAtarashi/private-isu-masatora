@@ -14,7 +14,6 @@ const (
 	templateKeyGetAdminBanned = "getAdminBanned"
 	templateKeyGetLogin       = "getLogin"
 	templateKeyGetRegister    = "getRegister"
-	templateKeyGetPost        = "getPost"
 	templateKeyGetPostsID     = "getPostsID"
 )
 
@@ -26,8 +25,6 @@ func parseTemplates() {
 	tplCache[templateKeyGetIndex] = template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
 		getTemplPath("layout.html"),
 		getTemplPath("index.html"),
-		getTemplPath("posts.html"),
-		getTemplPath("post.html"),
 	))
 
 	tplCache[templateKeyGetAccountName] = template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
@@ -51,11 +48,6 @@ func parseTemplates() {
 		getTemplPath("layout.html"),
 		getTemplPath("register.html")),
 	)
-
-	tplCache[templateKeyGetPost] = template.Must(template.New("posts.html").Funcs(fmap).ParseFiles(
-		getTemplPath("posts.html"),
-		getTemplPath("post.html"),
-	))
 
 	tplCache[templateKeyGetPostsID] = template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
 		getTemplPath("layout.html"),

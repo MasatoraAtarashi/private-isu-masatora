@@ -41,3 +41,6 @@ delete-images:
 
 profile:
 	go tool pprof http://localhost:8080/debug/pprof/profile
+
+get-log:
+	sudo journalctl -f -u isu-go
