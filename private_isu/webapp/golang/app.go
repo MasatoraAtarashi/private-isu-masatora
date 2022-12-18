@@ -141,11 +141,10 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 
 	tplCache[templateKeyGetIndex].Execute(w, struct {
 		PostsHTML string
-		Posts     []Post
 		Me        User
 		CSRFToken string
 		Flash     string
-	}{getPostsHTMLString(posts), posts, me, getCSRFToken(r), getFlash(w, r, "notice")})
+	}{getPostsHTMLString(posts), me, getCSRFToken(r), getFlash(w, r, "notice")})
 }
 
 func getAccountName(w http.ResponseWriter, r *http.Request) {

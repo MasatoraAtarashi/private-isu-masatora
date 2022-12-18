@@ -5,7 +5,7 @@ import "fmt"
 func getPostsHTMLString(posts []Post) string {
 	var html string
 	html += `<div class="isu-posts">`
-	for _, post := range posts {
+	for i := range posts {
 		html += fmt.Sprintf(`
 <div class="isu-post" id="pid_%d" data-created-at="%s"}}">
   <div class="isu-post-header">
@@ -38,20 +38,20 @@ func getPostsHTMLString(posts []Post) string {
   </div>
 </div>
 `,
-			post.ID,
-			post.CreatedAt.Format("2006-01-02T15:04:05-07:00"),
-			post.User.AccountName,
-			post.User.AccountName,
-			post.ID,
-			post.CreatedAt.Format("2006-01-02T15:04:05-07:00"),
-			imageURL(post),
-			post.User.AccountName,
-			post.User.AccountName,
-			post.Body,
-			post.CommentCount,
-			getPostCommentsHTMLString(post.Comments),
-			post.ID,
-			post.CSRFToken,
+			posts[i].ID,
+			posts[i].CreatedAt.Format("2006-01-02T15:04:05-07:00"),
+			posts[i].User.AccountName,
+			posts[i].User.AccountName,
+			posts[i].ID,
+			posts[i].CreatedAt.Format("2006-01-02T15:04:05-07:00"),
+			imageURL(posts[i]),
+			posts[i].User.AccountName,
+			posts[i].User.AccountName,
+			posts[i].Body,
+			posts[i].CommentCount,
+			getPostCommentsHTMLString(posts[i].Comments),
+			posts[i].ID,
+			posts[i].CSRFToken,
 		)
 	}
 	html += `</div>`
@@ -61,16 +61,16 @@ func getPostsHTMLString(posts []Post) string {
 
 func getPostCommentsHTMLString(comments []Comment) string {
 	var html string
-	for _, comment := range comments {
+	for i := range comments {
 		html += fmt.Sprintf(`
 	    <div class="isu-comment">
       <a href="/@%s" class="isu-comment-account-name">%s</a>
       <span class="isu-comment-text">%s</span>
     </div>
 `,
-			comment.User.AccountName,
-			comment.User.AccountName,
-			comment.Comment,
+			comments[i].User.AccountName,
+			comments[i].User.AccountName,
+			comments[i].Comment,
 		)
 	}
 
