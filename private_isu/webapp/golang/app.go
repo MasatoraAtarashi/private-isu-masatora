@@ -289,12 +289,9 @@ func main() {
 	}
 	defer db.Close()
 
-	err = toStaticImageFile()
-	if err != nil {
-		panic(err)
-	}
-
 	r := chi.NewRouter()
+
+	r.Get("/to_static_file", toStaticImageFile)
 
 	r.Get("/initialize", getInitialize)
 	r.Get("/login", getLogin)
