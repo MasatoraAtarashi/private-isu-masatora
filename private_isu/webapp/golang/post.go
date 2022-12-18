@@ -354,6 +354,7 @@ func getImage(w http.ResponseWriter, r *http.Request) {
 
 func writeImageFile(pid int64, ext string, data []byte) error {
 	// 画像ファイルをpublic/image/ディレクトリに書き込む
+	log.Println("write image file: ", fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext))
 	imgFile, err := os.Create(fmt.Sprintf("%s/%s.%s", imgDir, strconv.FormatInt(pid, 10), ext))
 	if err != nil {
 		return err
