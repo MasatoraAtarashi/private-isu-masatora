@@ -8,21 +8,21 @@ import (
 
 // MySQLに最初から入ってる画像を静的ファイル化する
 func toStaticImageFile(w http.ResponseWriter, r *http.Request) {
-	var postIDs []uint8
-	err := db.Get(&postIDs, "SELECT id FROM posts")
+	var posts []Post
+	err := db.Get(&posts, "SELECT id FROM posts")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Print(err)
 		return
 	}
 
-	log.Println("default images count", len(postIDs))
+	log.Println("default images count", len(posts))
 
-	for _, postID := range postIDs {
-		log.Println("to static file: ", postID)
+	for _, post := range posts {
+		log.Println("to static file: ", post.ID)
 
 		post := Post{}
-		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", postID)
+		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", post.ID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Print(err)
@@ -43,7 +43,7 @@ func toStaticImageFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = writeImageFile(int64(postID), ext, post.Imgdata)
+		err = writeImageFile(int64(post.ID), ext, post.Imgdata)
 	}
 
 	w.WriteHeader(http.StatusOK)
