@@ -32,18 +32,6 @@ const (
 	imgDir        = "/home/isucon/private_isu/webapp/public/image"
 )
 
-func init() {
-	memdAddr := os.Getenv("ISUCONP_MEMCACHED_ADDRESS")
-	if memdAddr == "" {
-		memdAddr = "localhost:11211"
-	}
-	memcacheClient = memcache.New(memdAddr)
-	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-
-	parseTemplates()
-}
-
 func getFlash(w http.ResponseWriter, r *http.Request, key string) string {
 	session := getSession(r)
 	value, ok := session.Values[key]
