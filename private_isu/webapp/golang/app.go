@@ -215,13 +215,13 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 	me := getSessionUser(r)
 
 	tplCache[templateKeyGetAccountName].Execute(w, struct {
-		Posts          []Post
+		PostsHTML      string
 		User           User
 		PostCount      int
 		CommentCount   int
 		CommentedCount int
 		Me             User
-	}{posts, user, postCount, commentCount, commentedCount, me})
+	}{getPostsHTMLString(posts), user, postCount, commentCount, commentedCount, me})
 }
 
 func getAdminBanned(w http.ResponseWriter, r *http.Request) {
