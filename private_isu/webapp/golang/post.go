@@ -92,7 +92,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if err != nil {
 				return nil, err
 			}
-			log.Printf("comments: %+v", comments)
 			p.Comments = comments
 		} else {
 			query := "SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC"
@@ -123,9 +122,6 @@ func makePosts(results []Post, csrfToken string, allComments bool) ([]Post, erro
 			if err != nil {
 				return nil, err
 			}
-
-			log.Printf("p.Comments: %+v", p.Comments)
-
 		}
 
 		p.CSRFToken = csrfToken
@@ -144,8 +140,6 @@ func setCommentsCache(comments []Comment, pid int, allComments bool) error {
 	if err != nil {
 		return err
 	}
-
-	log.Printf("key: %s", fmt.Sprintf("comments.%d.%t", pid, allComments))
 
 	err = memcacheClient.Set(&memcache.Item{
 		Key:        fmt.Sprintf("comments.%d.%t", pid, allComments),
