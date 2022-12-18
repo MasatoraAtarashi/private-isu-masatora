@@ -38,3 +38,6 @@ delete-old-logs:
 
 delete-images:
 	rm /home/isucon/private_isu/webapp/public/image/*
+
+profile:
+	go tool pprof http://localhost:8080/debug/pprof/profile
