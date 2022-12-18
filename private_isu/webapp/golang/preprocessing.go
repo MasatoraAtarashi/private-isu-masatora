@@ -7,7 +7,7 @@ import (
 
 // MySQLに最初から入ってる画像を静的ファイル化する
 func toStaticImageFile() error {
-	var postIDs []int
+	var postIDs []uint8
 	err := db.Get(&postIDs, "SELECT id FROM posts")
 	if err != nil {
 		log.Print(err)
