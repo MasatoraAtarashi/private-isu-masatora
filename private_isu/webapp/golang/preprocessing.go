@@ -9,7 +9,7 @@ import (
 // MySQLに最初から入ってる画像を静的ファイル化する
 func toStaticImageFile(w http.ResponseWriter, r *http.Request) {
 	var posts []Post
-	err := db.Get(&posts, "SELECT id FROM posts")
+	err := db.Select(&posts, "SELECT id, imgdata, mime FROM posts")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Print(err)
@@ -20,14 +20,6 @@ func toStaticImageFile(w http.ResponseWriter, r *http.Request) {
 
 	for _, post := range posts {
 		log.Println("to static file: ", post.ID)
-
-		post := Post{}
-		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", post.ID)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			log.Print(err)
-			return
-		}
 
 		var ext string
 		switch post.Mime {
