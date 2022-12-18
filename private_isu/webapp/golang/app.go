@@ -3,7 +3,6 @@ package main
 import (
 	crand "crypto/rand"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -215,16 +214,7 @@ func getAccountName(w http.ResponseWriter, r *http.Request) {
 
 	me := getSessionUser(r)
 
-	fmap := template.FuncMap{
-		"imageURL": imageURL,
-	}
-
-	template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
-		getTemplPath("layout.html"),
-		getTemplPath("user.html"),
-		getTemplPath("posts.html"),
-		getTemplPath("post.html"),
-	)).Execute(w, struct {
+	tplCache[templateKeyGetAccountName].Execute(w, struct {
 		Posts          []Post
 		User           User
 		PostCount      int
@@ -253,10 +243,7 @@ func getAdminBanned(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	template.Must(template.ParseFiles(
-		getTemplPath("layout.html"),
-		getTemplPath("banned.html")),
-	).Execute(w, struct {
+	tplCache[templateKeyGetAdminBanned].Execute(w, struct {
 		Users     []User
 		Me        User
 		CSRFToken string
