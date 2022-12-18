@@ -16,7 +16,11 @@ func toStaticImageFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("default images count", len(postIDs))
+
 	for _, postID := range postIDs {
+		log.Println("to static file: ", postID)
+
 		post := Post{}
 		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", postID)
 		if err != nil {
