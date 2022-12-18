@@ -144,8 +144,10 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	file := "layout.html"
+
 	tplCacheMu.RLock()
-	tpl, ok := tplCache["layout.html"]
+	tpl, ok := tplCache[file]
 	tplCacheMu.RUnlock()
 
 	if !ok {
@@ -153,12 +155,16 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 			"imageURL": imageURL,
 		}
 
-		tpl = template.Must(template.New("layout.html").Funcs(fmap).ParseFiles(
+		tpl = template.Must(template.New(file).Funcs(fmap).ParseFiles(
 			getTemplPath("layout.html"),
 			getTemplPath("index.html"),
 			getTemplPath("posts.html"),
 			getTemplPath("post.html"),
 		))
+
+		tplCacheMu.Lock()
+		defer tplCacheMu.Unlock()
+		tplCache[file] = tpl
 	}
 
 	tpl.Execute(w, struct {
