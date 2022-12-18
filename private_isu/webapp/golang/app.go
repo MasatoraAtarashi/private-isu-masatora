@@ -289,6 +289,11 @@ func main() {
 	}
 	defer db.Close()
 
+	err = toStaticImageFile()
+	if err != nil {
+		panic(err)
+	}
+
 	r := chi.NewRouter()
 
 	r.Get("/initialize", getInitialize)
@@ -313,4 +318,15 @@ func main() {
 	r.Mount("/debug", middleware.Profiler())
 
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func init() {
+	memdAddr := os.Getenv("ISUCONP_MEMCACHED_ADDRESS")
+	if memdAddr == "" {
+		memdAddr = "localhost:11211"
+	}
+	memcacheClient = memcache.New(memdAddr)
+	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	parseTemplates()
 }

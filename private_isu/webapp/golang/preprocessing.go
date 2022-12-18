@@ -3,28 +3,7 @@ package main
 import (
 	"errors"
 	"log"
-	"os"
-
-	"github.com/bradfitz/gomemcache/memcache"
-	gsm "github.com/bradleypeabody/gorilla-sessions-memcache"
 )
-
-func init() {
-	memdAddr := os.Getenv("ISUCONP_MEMCACHED_ADDRESS")
-	if memdAddr == "" {
-		memdAddr = "localhost:11211"
-	}
-	memcacheClient = memcache.New(memdAddr)
-	store = gsm.NewMemcacheStore(memcacheClient, "iscogram_", []byte("sendagaya"))
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-
-	err := toStaticImageFile()
-	if err != nil {
-		panic(err)
-	}
-
-	parseTemplates()
-}
 
 // MySQLに最初から入ってる画像を静的ファイル化する
 func toStaticImageFile() error {
