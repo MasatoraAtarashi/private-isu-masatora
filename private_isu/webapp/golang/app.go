@@ -150,6 +150,10 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	tpl, ok := tplCache[file]
 	tplCacheMu.RUnlock()
 
+	if ok {
+		log.Println("tmplate cache used")
+	}
+
 	if !ok {
 		fmap := template.FuncMap{
 			"imageURL": imageURL,
