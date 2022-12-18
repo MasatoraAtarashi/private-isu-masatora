@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	tplCache = make(map[string]*template.Template, 6)
+	tplCache = make(map[string]*template.Template, 7)
 )
 
 const (
