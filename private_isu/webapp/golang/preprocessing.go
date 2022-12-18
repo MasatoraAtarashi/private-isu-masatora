@@ -37,7 +37,7 @@ func toStaticImageFile() error {
 
 	for _, postID := range postIDs {
 		post := Post{}
-		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", pid)
+		err = db.Get(&post, "SELECT imgdata, mime FROM `posts` WHERE `id` = ?", postID)
 		if err != nil {
 			log.Print(err)
 			return err
